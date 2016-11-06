@@ -50,6 +50,13 @@ public class VdmDesktopManager : MonoBehaviour {
     public bool ShowLine = true;
     [Tooltip("Monitor texture filtering")]
     public FilterMode TextureFilterMode = FilterMode.Point;
+    [Tooltip("Monitor Color Space")]
+    public bool LinearColorSpace = false;
+    [Tooltip("Multimonitor - 0 for all, otherwise screen number 1..x")]
+    public int MultiMonitorScreen = 0;
+    [Tooltip("Distance offset between monitors if MultiMonitorScreen==0")]
+    public Vector3 MultiMonitorPositionOffset = new Vector3(1,0,0);
+    
     [Tooltip("Render Scale - Supersampling. GPU intensive if >1")]
     [Range(1f, 2f)]
     public float RenderScale = 1.0f;
@@ -218,14 +225,19 @@ public class VdmDesktopManager : MonoBehaviour {
         monitorBase.SetActive(false);
 
         int nScreen = DesktopCapturePlugin_GetNDesks();
-
+        int iScreenIndex = 0;
         for (int s = 0; s < nScreen; s++)
         {
             GameObject monitor = GameObject.Instantiate(monitorBase);
 
+            if ((MultiMonitorScreen != 0) && (MultiMonitorScreen != (s + 1)))
+                continue;
+
             monitor.name = "Monitor " + (s+1).ToString();
             VdmDesktop desk = monitor.AddComponent<VdmDesktop>();
             desk.Screen = s;
+            desk.ScreenIndex = iScreenIndex;
+            iScreenIndex++;
             monitor.transform.SetParent(transform);
 
             monitor.SetActive(true);
@@ -403,10 +415,10 @@ public class VdmDesktopManager : MonoBehaviour {
             int screen = winDesk.Screen;
             int width = DesktopCapturePlugin_GetWidth(screen);
             int height = DesktopCapturePlugin_GetHeight(screen);
-            var tex = new Texture2D(width, height, TextureFormat.BGRA32, false);
+            var tex = new Texture2D(width, height, TextureFormat.BGRA32, false, LinearColorSpace);
 
             DesktopCapturePlugin_SetTexturePtr(screen, tex.GetNativeTexturePtr());
-
+            
             winDesk.ReInit(tex, width, height);                        
         }
     }

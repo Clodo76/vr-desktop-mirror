@@ -8,7 +8,10 @@ using System.Xml;
 
 public class VdmDesktop : MonoBehaviour
 {
+    [HideInInspector]
     public int Screen = 0;
+    [HideInInspector]
+    public int ScreenIndex = 0;
 
     [DllImport("user32.dll")]
     static extern void mouse_event(int dwFlags, int dx, int dy,
@@ -164,6 +167,7 @@ public class VdmDesktop : MonoBehaviour
             m_manager.KeyboardDistance = Mathf.Clamp(m_manager.KeyboardDistance, 0.2f, 100);
 
             m_positionNormal = Camera.main.transform.position + Camera.main.transform.rotation * new Vector3(0, 0, m_manager.KeyboardDistance);
+            m_positionNormal += m_manager.MultiMonitorPositionOffset * ScreenIndex;
             m_rotationNormal = Camera.main.transform.rotation;            
         }
 
@@ -212,6 +216,7 @@ public class VdmDesktop : MonoBehaviour
                 Vector3 deltaCursor = transform.position - cursorPos;
                 
                 m_positionZoomed = Camera.main.transform.position + Camera.main.transform.rotation * new Vector3(0, 0, m_manager.KeyboardZoomDistance);
+                m_positionZoomed += m_manager.MultiMonitorPositionOffset * ScreenIndex;
                 m_rotationZoomed = Camera.main.transform.rotation;
 
                 m_positionZoomed += deltaCursor;
